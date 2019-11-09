@@ -6,6 +6,7 @@
 """
 import cv2
 from managers import WindowManger, CaptureManger
+import filters
 
 
 class Cameo(object):
@@ -13,12 +14,15 @@ class Cameo(object):
     def __init__(self):
         self._windowManger = WindowManger('Cameo', self.oneKeypress)
         self._captureManger = CaptureManger(cv2.VideoCapture(0), self._windowManger, True)
+        self._filter = filters.SharpenFilter()  # 锐化
 
     def run(self):
         self._windowManger.createWindow()
         while self._windowManger.isWindowCreated:
             self._captureManger.enterFrame()
             frame = self._captureManger.frame
+            filters.strokeEdges(frame, frame)
+            self._filter.apply(frame, frame)
 
             self._captureManger.exitFrame()
             self._windowManger.processEvents()

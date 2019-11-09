@@ -9,7 +9,7 @@ import numpy as np
 import utils
 
 
-def strokeEdges(src, dst, blurKsize=7, edgeKsize=5):
+def strokeEdges(src, dst, blurKsize=3, edgeKsize=5):
     if blurKsize >= 3:
         blurredSrc = cv2.medianBlur(src, blurKsize)  # 模糊
         graySrc = cv2.cvtColor(blurredSrc, cv2.COLOR_BGR2GRAY)
@@ -38,13 +38,51 @@ class SharpenFilter(VConvolution_Filter):
         kernel = np.array([[-1, -1, -1],
                            [-1,  9, -1],
                            [-1, -1, -1]])
-        VConvolution_Filter.__init__(self, kernel)
+        super().__init__(kernel)
+
+
+class FindEdgesFilter(VConvolution_Filter):
+    """边缘检测"""
+    def __init__(self):
+        kernel = np.array([[-1, -1, -1],
+                           [-1,  8, -1],
+                           [-1, -1, -1]])
+        super().__init__(kernel)
+
+
+class BlurFilter(VConvolution_Filter):
+    """模糊滤波器"""
+    def __init__(self):
+        kernel = np.array([[0.04, 0.04, 0.04, 0.04],
+                           [0.04, 0.04, 0.04, 0.04],
+                           [0.04, 0.04, 0.04, 0.04],
+                           [0.04, 0.04, 0.04, 0.04]])
+        super().__init__(kernel)
+
+
+class EmbossFilter(VConvolution_Filter):
+    """浮雕效果"""
+    def __init__(self):
+        kernel = np.array([[-2, -1, 0],
+                           [-1,  1, 1],
+                           [0, 1, 2]])
+        super().__init__(kernel)
+
+
+def canny_edge(src):
+    dst = cv2.Canny(src, 200, 300)
+    return dst
 
 
 if __name__ == '__main__':
-    src = cv2.imread(r'C:\Users\shuxitech\PycharmProjects\img_learn\test1.jpg')
-    dst = np.zeros(src.shape)
-    img = strokeEdges(src, src)
-    cv2.imshow('test', src)
+    src = cv2.imread(r'test1.jpg')
+    cv2.imshow('input', src)
+    strokeEdges(src, src)
+    cv2.imshow('sE', src)
+
+    FindEdgesFilter().apply(src, src)
+    cv2.imshow('edgeKernel', src)
+
+    cv2.imshow('canny', canny_edge(src))
     cv2.waitKey()
     cv2.destroyAllWindows()
